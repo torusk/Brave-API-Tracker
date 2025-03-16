@@ -8,12 +8,15 @@
         :root {
             --main-color: #FF6B3D;
             --secondary-color: #95C7F3;
-            --background-color: #F5F7FA;
-            --card-color: #FFFFFF;
-            --text-color: #333333;
+            --pace-color: #47D78A;
+            --projection-color: #8A7BF7;
             --warning-color: #FFC857;
             --danger-color: #FF5A5F;
             --success-color: #47D78A;
+            --background-color: #F5F7FA;
+            --card-color: #FFFFFF;
+            --text-color: #333333;
+            --light-gray: #E1E5EA;
         }
 
         body {
@@ -33,7 +36,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         h1 {
@@ -76,7 +79,7 @@
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #E1E5EA;
+            border: 1px solid var(--light-gray);
             background-color: #FFFFFF;
             color: var(--text-color);
             font-size: 16px;
@@ -109,10 +112,12 @@
             box-shadow: 0 6px 12px rgba(255, 107, 61, 0.4);
         }
 
-        .visualization {
+        .charts-container {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
-            margin: 40px 0;
+            gap: 20px;
+            margin: 30px 0;
             animation: fadeIn 1s ease-out;
         }
         
@@ -121,27 +126,59 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .chart-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 220px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
         .chart-container {
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: 180px;
+            height: 180px;
         }
 
         .donut-chart {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            background: conic-gradient(
-                var(--main-color) 0% var(--percent, 30%), 
-                var(--secondary-color) var(--percent, 30%) 100%
-            );
             position: relative;
-            box-shadow: 0 10px 25px rgba(255, 107, 61, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s ease;
         }
         
         .donut-chart:hover {
             transform: scale(1.05);
+        }
+
+        .usage-chart {
+            background: conic-gradient(
+                var(--main-color) 0% var(--percent, 30%), 
+                var(--light-gray) var(--percent, 30%) 100%
+            );
+        }
+
+        .pace-chart {
+            background: conic-gradient(
+                var(--pace-color) 0% var(--pace-percent, 30%),
+                var(--light-gray) var(--pace-percent, 30%) 100%
+            );
+        }
+
+        .projection-chart {
+            background: conic-gradient(
+                var(--projection-color) 0% var(--projection-percent, 30%),
+                var(--light-gray) var(--projection-percent, 30%) 100%
+            );
         }
 
         .chart-hole {
@@ -160,13 +197,59 @@
         }
 
         .percent-text {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: bold;
+            margin-bottom: 2px;
         }
 
-        .usage-text {
-            font-size: 14px;
-            color: #A1A1AA;
+        .usage-percent {
+            color: var(--main-color);
+        }
+
+        .pace-percent {
+            color: var(--pace-color);
+        }
+
+        .projection-percent {
+            color: var(--projection-color);
+        }
+
+        .detail-text {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        /* マーカー */
+        .time-marker {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .marker-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50%;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.8);
+            transform-origin: left center;
+            z-index: 5;
+        }
+
+        .marker-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: white;
+            top: calc(50% - 3px);
+            right: -3px;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
         }
 
         .stats-grid {
@@ -202,41 +285,44 @@
             color: #A1A1AA;
         }
 
-        .pace-meter {
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
             margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
+            margin-bottom: 10px;
         }
 
-        .pace-bar {
-            height: 10px;
-            background-color: var(--secondary-color);
-            border-radius: 5px;
-            margin-top: 10px;
-            position: relative;
-            overflow: hidden;
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            color: #666;
         }
 
-        .pace-progress {
-            height: 100%;
-            background-color: var(--success-color);
-            border-radius: 5px;
-            width: var(--pace-percent, 50%);
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
         }
 
-        .pace-marker {
-            position: absolute;
-            width: 3px;
-            height: 20px;
-            background-color: #fff;
-            top: -5px;
-            left: var(--ideal-marker, 50%);
+        .legend-usage {
+            background-color: var(--main-color);
         }
 
-        .pace-label {
-            margin-top: 10px;
-            font-size: 14px;
+        .legend-pace {
+            background-color: var(--pace-color);
+        }
+
+        .legend-projection {
+            background-color: var(--projection-color);
+        }
+
+        .legend-time {
+            background-color: white;
+            border: 1px solid #ddd;
         }
 
         footer {
@@ -252,6 +338,11 @@
             .input-section {
                 grid-template-columns: 1fr;
             }
+            
+            .charts-container {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -262,14 +353,73 @@
             <p>月間APIコール数の使用状況を視覚的に確認</p>
         </header>
 
-        <div class="visualization">
-            <div class="chart-container">
-                <div class="donut-chart">
-                    <div class="chart-hole">
-                        <div class="percent-text">0%</div>
-                        <div class="usage-text">0 / 2000</div>
+        <div class="charts-container">
+            <!-- 使用率チャート -->
+            <div class="chart-wrapper">
+                <div class="chart-title">現在の使用率</div>
+                <div class="chart-container">
+                    <div class="donut-chart usage-chart">
+                        <div class="chart-hole">
+                            <div class="percent-text usage-percent">0%</div>
+                            <div class="detail-text">
+                                <span id="usage-count">0</span> / <span id="usage-limit">2000</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 時間経過マーカー -->
+                        <div class="time-marker">
+                            <div class="marker-line">
+                                <div class="marker-dot"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- 使用ペースチャート -->
+            <div class="chart-wrapper">
+                <div class="chart-title">使用ペース</div>
+                <div class="chart-container">
+                    <div class="donut-chart pace-chart">
+                        <div class="chart-hole">
+                            <div class="percent-text pace-percent">0%</div>
+                            <div class="detail-text" id="pace-status">理想的なペース</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 予測使用率チャート -->
+            <div class="chart-wrapper">
+                <div class="chart-title">月末予測</div>
+                <div class="chart-container">
+                    <div class="donut-chart projection-chart">
+                        <div class="chart-hole">
+                            <div class="percent-text projection-percent">0%</div>
+                            <div class="detail-text">予測: <span id="projected-count">0</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- チャート凡例 -->
+        <div class="chart-legend">
+            <div class="legend-item">
+                <div class="legend-color legend-usage"></div>
+                <span>現在の使用率</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-pace"></div>
+                <span>理想ペースとの比較</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-projection"></div>
+                <span>月末予測使用率</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-time"></div>
+                <span>月の経過時間</span>
             </div>
         </div>
 
@@ -292,7 +442,7 @@
                     </div>
                     <div class="input-group">
                         <label for="api-calls">現在までのAPIコール数</label>
-                        <input type="number" id="api-calls" placeholder="例: 350">
+                        <input type="number" id="api-calls" placeholder="例: 42">
                     </div>
                 </div>
             </div>
@@ -320,22 +470,8 @@
             </div>
         </div>
 
-        <div class="card">
-            <h3>使用ペース</h3>
-            <div class="pace-meter">
-                <div class="pace-bar">
-                    <div class="pace-progress"></div>
-                    <div class="pace-marker"></div>
-                </div>
-                <div class="pace-label">
-                    理想的なペースに対して <span id="pace-percent">0%</span>
-                    (<span id="pace-status">ちょうどいいペース</span>)
-                </div>
-            </div>
-        </div>
-
         <footer>
-            <p>このページはローカルで動作し、データは保存されません。ブラウザにはデータが保存されますが、第三者に送信されることはありません。</p>
+            <p>このページはローカルで動作し、データはブラウザ内に保存されます。データが第三者に送信されることはありません。</p>
         </footer>
     </div>
 
@@ -381,6 +517,10 @@
             const idealUsedAtThisPoint = (percentTimePassed / 100) * totalLimit;
             const pacePercent = idealUsedAtThisPoint > 0 ? (apiCalls / idealUsedAtThisPoint) * 100 : 0;
             
+            // 予測計算
+            const projectedCalls = percentTimePassed > 0 ? Math.round(apiCalls * (100 / percentTimePassed)) : 0;
+            const projectedPercent = (projectedCalls / totalLimit) * 100;
+            
             let paceStatus = '';
             let paceColor = '';
             
@@ -388,7 +528,7 @@
                 paceStatus = '余裕があります';
                 paceColor = 'var(--success-color)';
             } else if (pacePercent < 120) {
-                paceStatus = 'ちょうどいいペース';
+                paceStatus = '理想的なペース';
                 paceColor = 'var(--success-color)';
             } else if (pacePercent < 150) {
                 paceStatus = '少し使いすぎです';
@@ -398,22 +538,31 @@
                 paceColor = 'var(--danger-color)';
             }
             
-            // UI更新
-            document.querySelector('.donut-chart').style.setProperty('--percent', `${usedPercent}%`);
-            document.querySelector('.percent-text').textContent = `${usedPercent.toFixed(1)}%`;
-            document.querySelector('.usage-text').textContent = `${apiCalls} / ${totalLimit}`;
+            // UI更新 - チャート
+            document.querySelector('.usage-chart').style.setProperty('--percent', `${usedPercent}%`);
+            document.querySelector('.pace-chart').style.setProperty('--pace-percent', `${Math.min(pacePercent, 200)}%`);
+            document.querySelector('.pace-chart').style.setProperty('--pace-color', paceColor);
+            document.querySelector('.projection-chart').style.setProperty('--projection-percent', `${Math.min(projectedPercent, 100)}%`);
             
+            // 時間経過マーカー
+            const markerAngle = (percentTimePassed / 100) * 360;
+            document.querySelector('.marker-line').style.transform = `rotate(${markerAngle}deg)`;
+            
+            // テキスト更新
+            document.querySelector('.usage-percent').textContent = `${usedPercent.toFixed(1)}%`;
+            document.querySelector('.pace-percent').textContent = `${pacePercent.toFixed(1)}%`;
+            document.querySelector('.projection-percent').textContent = `${projectedPercent.toFixed(1)}%`;
+            document.getElementById('usage-count').textContent = apiCalls;
+            document.getElementById('usage-limit').textContent = totalLimit;
+            document.getElementById('pace-status').textContent = paceStatus;
+            document.getElementById('projected-count').textContent = projectedCalls;
+            
+            // 統計カード更新
             document.getElementById('remaining-calls').textContent = remainingCalls;
             document.getElementById('days-passed').textContent = `${daysPassed}日`;
             document.getElementById('percent-time').textContent = `${percentTimePassed.toFixed(1)}%`;
             document.getElementById('days-remaining').textContent = `${daysRemaining}日`;
             document.getElementById('daily-recommended').textContent = recommendedDaily;
-            
-            document.querySelector('.pace-progress').style.setProperty('--pace-percent', `${Math.min(pacePercent, 200)}%`);
-            document.querySelector('.pace-progress').style.backgroundColor = paceColor;
-            document.querySelector('.pace-marker').style.setProperty('--ideal-marker', `${Math.min(percentTimePassed, 100)}%`);
-            document.getElementById('pace-percent').textContent = `${pacePercent.toFixed(1)}%`;
-            document.getElementById('pace-status').textContent = paceStatus;
             
             // データをローカルストレージに保存
             saveToStorage();
