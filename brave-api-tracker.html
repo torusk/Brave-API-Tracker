@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brave API使用状況トラッカー</title>
+    <style>
+        :root {
+            --main-color: #FF6B3D;
+            --secondary-color: #95C7F3;
+            --background-color: #F5F7FA;
+            --card-color: #FFFFFF;
+            --text-color: #333333;
+            --warning-color: #FFC857;
+            --danger-color: #FF5A5F;
+            --success-color: #47D78A;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--main-color);
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E8ECF2;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #E1E5EA;
+            background-color: #FFFFFF;
+            color: var(--text-color);
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--main-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 61, 0.2);
+            outline: none;
+        }
+
+        button {
+            background-color: var(--main-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(255, 107, 61, 0.3);
+        }
+
+        button:hover {
+            background-color: #FF8656;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 107, 61, 0.4);
+        }
+
+        .visualization {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chart-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        .donut-chart {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--main-color) 0% var(--percent, 30%), 
+                var(--secondary-color) var(--percent, 30%) 100%
+            );
+            position: relative;
+            box-shadow: 0 10px 25px rgba(255, 107, 61, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .donut-chart:hover {
+            transform: scale(1.05);
+        }
+
+        .chart-hole {
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            background-color: var(--card-color);
+            border-radius: 50%;
+            top: 15%;
+            left: 15%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .percent-text {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .usage-text {
+            font-size: 14px;
+            color: #A1A1AA;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 4px solid var(--main-color);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #A1A1AA;
+        }
+
+        .pace-meter {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .pace-bar {
+            height: 10px;
+            background-color: var(--secondary-color);
+            border-radius: 5px;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pace-progress {
+            height: 100%;
+            background-color: var(--success-color);
+            border-radius: 5px;
+            width: var(--pace-percent, 50%);
+        }
+
+        .pace-marker {
+            position: absolute;
+            width: 3px;
+            height: 20px;
+            background-color: #fff;
+            top: -5px;
+            left: var(--ideal-marker, 50%);
+        }
+
+        .pace-label {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #95A1B5;
+            font-size: 14px;
+            padding: 20px 0;
+            border-top: 1px solid #E1E5EA;
+        }
+
+        @media (max-width: 768px) {
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Brave API使用状況トラッカー</h1>
+            <p>月間APIコール数の使用状況を視覚的に確認</p>
+        </header>
+
+        <div class="visualization">
+            <div class="chart-container">
+                <div class="donut-chart">
+                    <div class="chart-hole">
+                        <div class="percent-text">0%</div>
+                        <div class="usage-text">0 / 2000</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="input-section">
+                <div>
+                    <div class="input-group">
+                        <label for="start-date">月間カウント開始日</label>
+                        <input type="date" id="start-date">
+                    </div>
+                    <div class="input-group">
+                        <label for="total-limit">月間APIコール上限</label>
+                        <input type="number" id="total-limit" value="2000">
+                    </div>
+                </div>
+                <div>
+                    <div class="input-group">
+                        <label for="current-date">現在の日付</label>
+                        <input type="date" id="current-date">
+                    </div>
+                    <div class="input-group">
+                        <label for="api-calls">現在までのAPIコール数</label>
+                        <input type="number" id="api-calls" placeholder="例: 350">
+                    </div>
+                </div>
+            </div>
+            <button id="update-btn">更新</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">残りAPIコール数</div>
+                <div class="stat-value" id="remaining-calls">2000</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">経過期間</div>
+                <div class="stat-value" id="days-passed">0日</div>
+                <div class="stat-label">(<span id="percent-time">0%</span>)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">残り期間</div>
+                <div class="stat-value" id="days-remaining">30日</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">1日あたり推奨</div>
+                <div class="stat-value" id="daily-recommended">66</div>
+                <div class="stat-label">コール数</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>使用ペース</h3>
+            <div class="pace-meter">
+                <div class="pace-bar">
+                    <div class="pace-progress"></div>
+                    <div class="pace-marker"></div>
+                </div>
+                <div class="pace-label">
+                    理想的なペースに対して <span id="pace-percent">0%</span>
+                    (<span id="pace-status">ちょうどいいペース</span>)
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>このページはローカルで動作し、データは保存されません。ブラウザにはデータが保存されますが、第三者に送信されることはありません。</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 今日の日付をデフォルトで設定
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('current-date').value = formattedDate;
+            
+            // 月初をデフォルトの開始日に設定
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const formattedFirstDay = firstDayOfMonth.toISOString().split('T')[0];
+            document.getElementById('start-date').value = formattedFirstDay;
+            
+            // ローカルストレージからデータを読み込む
+            loadFromStorage();
+            
+            // 更新ボタンのイベントリスナー
+            document.getElementById('update-btn').addEventListener('click', updateTracker);
+        });
+        
+        function updateTracker() {
+            const startDate = new Date(document.getElementById('start-date').value);
+            const currentDate = new Date(document.getElementById('current-date').value);
+            const totalLimit = parseInt(document.getElementById('total-limit').value) || 2000;
+            const apiCalls = parseInt(document.getElementById('api-calls').value) || 0;
+            
+            // 基本的な計算
+            const usedPercent = (apiCalls / totalLimit) * 100;
+            const remainingCalls = totalLimit - apiCalls;
+            
+            // 日数の計算
+            const totalDays = getDaysInMonth(startDate.getMonth(), startDate.getFullYear());
+            const daysPassed = Math.max(0, Math.min(totalDays, Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24)) + 1));
+            const daysRemaining = totalDays - daysPassed;
+            const percentTimePassed = (daysPassed / totalDays) * 100;
+            
+            // 推奨使用量の計算
+            const recommendedDaily = daysRemaining > 0 ? Math.round(remainingCalls / daysRemaining) : 0;
+            
+            // ペースの計算
+            const idealUsedAtThisPoint = (percentTimePassed / 100) * totalLimit;
+            const pacePercent = idealUsedAtThisPoint > 0 ? (apiCalls / idealUsedAtThisPoint) * 100 : 0;
+            
+            let paceStatus = '';
+            let paceColor = '';
+            
+            if (pacePercent < 80) {
+                paceStatus = '余裕があります';
+                paceColor = 'var(--success-color)';
+            } else if (pacePercent < 120) {
+                paceStatus = 'ちょうどいいペース';
+                paceColor = 'var(--success-color)';
+            } else if (pacePercent < 150) {
+                paceStatus = '少し使いすぎです';
+                paceColor = 'var(--warning-color)';
+            } else {
+                paceStatus = '使いすぎ注意！';
+                paceColor = 'var(--danger-color)';
+            }
+            
+            // UI更新
+            document.querySelector('.donut-chart').style.setProperty('--percent', `${usedPercent}%`);
+            document.querySelector('.percent-text').textContent = `${usedPercent.toFixed(1)}%`;
+            document.querySelector('.usage-text').textContent = `${apiCalls} / ${totalLimit}`;
+            
+            document.getElementById('remaining-calls').textContent = remainingCalls;
+            document.getElementById('days-passed').textContent = `${daysPassed}日`;
+            document.getElementById('percent-time').textContent = `${percentTimePassed.toFixed(1)}%`;
+            document.getElementById('days-remaining').textContent = `${daysRemaining}日`;
+            document.getElementById('daily-recommended').textContent = recommendedDaily;
+            
+            document.querySelector('.pace-progress').style.setProperty('--pace-percent', `${Math.min(pacePercent, 200)}%`);
+            document.querySelector('.pace-progress').style.backgroundColor = paceColor;
+            document.querySelector('.pace-marker').style.setProperty('--ideal-marker', `${Math.min(percentTimePassed, 100)}%`);
+            document.getElementById('pace-percent').textContent = `${pacePercent.toFixed(1)}%`;
+            document.getElementById('pace-status').textContent = paceStatus;
+            
+            // データをローカルストレージに保存
+            saveToStorage();
+        }
+        
+        function getDaysInMonth(month, year) {
+            return new Date(year, month + 1, 0).getDate();
+        }
+        
+        function saveToStorage() {
+            const data = {
+                startDate: document.getElementById('start-date').value,
+                totalLimit: document.getElementById('total-limit').value,
+                apiCalls: document.getElementById('api-calls').value
+            };
+            localStorage.setItem('braveApiTracker', JSON.stringify(data));
+        }
+        
+        function loadFromStorage() {
+            const savedData = localStorage.getItem('braveApiTracker');
+            
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('start-date').value = data.startDate || '';
+                document.getElementById('total-limit').value = data.totalLimit || 2000;
+                document.getElementById('api-calls').value = data.apiCalls || 0;
+                
+                // データを読み込んだ後に表示を更新
+                updateTracker();
+            }
+        }
+    </script>
+</body>
+</html>
